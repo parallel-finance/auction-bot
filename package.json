@@ -1,0 +1,9 @@
+{
+  "name": "auction-bot",
+  "version": "1.0.0",
+  "description": "Auction bot for parallel finance",
+  "main": "index.js",
+  "repository": "https://github.com/parallel-finance/auction-bot",
+  "author": "Alan WANG",
+  "license": "MIT"
+}
