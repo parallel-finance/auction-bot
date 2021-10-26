@@ -3,7 +3,7 @@ ENV NODE_ENV=production
 
 WORKDIR /app
 COPY ["package.json", "package-lock.json*", "./"]
-RUN npm install --production && npm install -g ts-node
+RUN npm install && npm install -g ts-node
 
 COPY . .
 
