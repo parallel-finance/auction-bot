@@ -11,22 +11,18 @@ export interface ContributionTask {
 
 export async function nextProcessBlock(): Promise<number> {
   const {
-    subqueries: {
-      nodes: [{ nextBlockHeight }],
-    },
+    _metadata: { lastProcessedHeight },
   } = await request(
-    process.env.GRAPHQL_ENDPOINT,
+    process.env.GRAPHQL_ENDPOINT!,
     gql`
       query {
-        subqueries {
-          nodes {
-            nextBlockHeight
-          }
+        _metadata {
+          lastProcessedHeight
         }
       }
     `
   );
-  return nextBlockHeight;
+  return lastProcessedHeight;
 }
 
 async function checkUnresolvedBlock(): Promise<Maybe<[number, number]>> {
@@ -34,7 +30,7 @@ async function checkUnresolvedBlock(): Promise<Maybe<[number, number]>> {
   const {
     dotContributions: { nodes },
   } = await request(
-    process.env.GRAPHQL_ENDPOINT,
+    process.env.GRAPHQL_ENDPOINT!,
     gql`
       query {
         dotContributions(
@@ -74,7 +70,7 @@ export async function fetchContributions(): Promise<
   const {
     dotContributions: { nodes },
   } = await request(
-    process.env.GRAPHQL_ENDPOINT,
+    process.env.GRAPHQL_ENDPOINT!,
     gql`
       query {
         dotContributions(
