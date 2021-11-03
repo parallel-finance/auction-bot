@@ -33,49 +33,55 @@ async function main() {
   const signer = keyring.addFromUri(PROXY_ACCOUNT_SEED as string);
 
   const sendTxAndWaitTillFinalized = async (
-    tx: SubmittableExtrinsic<"promise">
+    tx: SubmittableExtrinsic<"promise">,
+    offset: number
   ) => {
     let nonce = await api.rpc.system.accountNextIndex(signer.address);
-
     return new Promise<number>((resolve) => {
-      tx.signAndSend(signer, { nonce }, async ({ status }) => {
-        if (status.isFinalized) {
-          const {
-            block: { header },
-          } = await api.rpc.chain.getBlock(status.asFinalized.toHex());
-          logger.info(`Calls finalized in Block#${header.number}`);
-          return resolve(header.number.toNumber());
+      tx.signAndSend(
+        signer,
+        { nonce: nonce.toNumber() + offset },
+        async ({ status }) => {
+          if (status.isFinalized) {
+            const {
+              block: { header },
+            } = await api.rpc.chain.getBlock(status.asFinalized.toHex());
+            logger.info(`Calls finalized in Block#${header.number}`);
+            return resolve(header.number.toNumber());
+          }
         }
-      });
+      );
     });
   };
 
   while (true) {
     const result = await fetchContributions();
-    if (!result) {
+    if (!result || result.length == 0) {
       await sleep(6000);
       continue;
     }
 
-    let [tasks, first, last] = result;
-    logger.info(`Fetched task during block#[${first}, ${last}]`);
+    let calls = result.map((t, index) => {
+      logger.info(`Process tx with ${t.id}`);
+      let txs = [
+        api.tx.system.remark(t.id),
+        api.tx.crowdloan.contribute(t.paraId, t.amount, null),
+      ];
+      if (t.referralCode)
+        txs.push(api.tx.crowdloan.addMemo(t.paraId, t.referralCode));
+      return sendTxAndWaitTillFinalized(
+        api.tx.proxy.proxy(
+          PROXIED_ACCOUNT as string,
+          null,
+          api.tx.utility.batchAll(txs)
+        ),
+        index
+      );
+    });
 
-    let calls = [
-      api.tx.system.remark(`${first}:${last}`),
-      ...tasks.map((t) =>
-        api.tx.crowdloan.contribute(t.paraId, t.amount, null)
-      ),
-    ];
+    const callResults = await Promise.all(calls);
+    const finalizedBlock = Math.max(...callResults);
 
-    logger.info(`Signer addr: ${signer.address.toString()}`);
-
-    const finalizedBlock = await sendTxAndWaitTillFinalized(
-      api.tx.proxy.proxy(
-        PROXIED_ACCOUNT as string,
-        null,
-        api.tx.utility.batchAll(calls)
-      )
-    );
     await waitSubqueryIndexBlock(finalizedBlock);
   }
 }

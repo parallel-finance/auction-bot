@@ -4,9 +4,11 @@ import { logger } from "./logger";
 type Maybe<T> = T | null;
 
 export interface ContributionTask {
+  id: string;
   blockHeight: number;
   paraId: number;
   amount: string;
+  referralCode?: string;
 }
 
 export async function nextProcessBlock(): Promise<number> {
@@ -57,15 +59,13 @@ async function checkUnresolvedBlock(): Promise<Maybe<[number, number]>> {
 }
 
 // cannot get last task committed.
-export async function fetchContributions(): Promise<
-  [ContributionTask[], number, number] | null
-> {
+export async function fetchContributions(): Promise<ContributionTask[] | null> {
   logger.debug("Enter fetch Contribution");
-  const blockRange = await checkUnresolvedBlock();
-
-  if (!blockRange) {
-    return null;
-  }
+  // const blockRange = await checkUnresolvedBlock();
+  //
+  // if (!blockRange) {
+  //   return null;
+  // }
 
   const {
     dotContributions: { nodes },
@@ -75,19 +75,20 @@ export async function fetchContributions(): Promise<
       query {
         dotContributions(
           orderBy: BLOCK_HEIGHT_ASC
-          filter: {
-            blockHeight: { greaterThanOrEqualTo: ${blockRange[0]}, lessThanOrEqualTo: ${blockRange[1]} }
-          }
+          first: 100
+          filter: { transactionExecuted: { equalTo: false } }
         ) {
           nodes {
+            id
             blockHeight
             paraId
             amount
+            referralCode
           }
         }
       }
     `
   );
   logger.debug(`Fetch ${nodes.length} tasks`);
-  return [nodes, ...blockRange];
+  return nodes;
 }
