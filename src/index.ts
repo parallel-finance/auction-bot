@@ -54,6 +54,9 @@ async function main() {
     });
   };
 
+  const { block } = await api.rpc.chain.getBlock();
+  await waitSubqueryIndexBlock(block.header.number.toNumber());
+
   while (true) {
     const result = await fetchContributions();
     if (!result || result.length == 0) {
