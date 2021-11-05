@@ -8,7 +8,6 @@ export interface ContributionTask {
   blockHeight: number;
   paraId: number;
   amount: string;
-  referralCode?: string;
 }
 
 export async function nextProcessBlock(): Promise<number> {
@@ -30,11 +29,6 @@ export async function nextProcessBlock(): Promise<number> {
 // cannot get last task committed.
 export async function fetchContributions(): Promise<ContributionTask[] | null> {
   logger.debug("Enter fetch Contribution");
-  // const blockRange = await checkUnresolvedBlock();
-  //
-  // if (!blockRange) {
-  //   return null;
-  // }
 
   const {
     dotContributions: { nodes },
@@ -45,14 +39,16 @@ export async function fetchContributions(): Promise<ContributionTask[] | null> {
         dotContributions(
           orderBy: BLOCK_HEIGHT_ASC
           first: 100
-          filter: { transactionExecuted: { equalTo: false } }
+          filter: {
+            transactionExecuted: { equalTo: false }
+            isPending: { equalTo: false }
+          }
         ) {
           nodes {
             id
             blockHeight
             paraId
             amount
-            referralCode
           }
         }
       }

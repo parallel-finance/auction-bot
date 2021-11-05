@@ -69,7 +69,6 @@ async function main() {
       // batchAll[
       //  remark(previous_hash)
       //  proxy(contribute(amount))
-      //  proxy(addMemo(referralCode))
       // ]
       let txs = [
         api.tx.system.remark(t.id),
@@ -79,15 +78,6 @@ async function main() {
           api.tx.crowdloan.contribute(t.paraId, t.amount, null)
         ),
       ];
-      if (t.referralCode) {
-        txs.push(
-          api.tx.proxy.proxy(
-            PROXIED_ACCOUNT as string,
-            null,
-            api.tx.crowdloan.addMemo(t.paraId, t.referralCode)
-          )
-        );
-      }
       return sendTxAndWaitTillFinalized(api.tx.utility.batchAll(txs), index);
     });
 
