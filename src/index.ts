@@ -1,4 +1,8 @@
-import { fetchContributions, nextProcessBlock } from "./query";
+import {
+  ContributionTask,
+  fetchContributions,
+  nextProcessBlock,
+} from "./query";
 import { logger } from "./logger";
 import { ApiPromise, WsProvider, Keyring } from "@polkadot/api";
 import type { SubmittableExtrinsic } from "@polkadot/api/submittable/types";
@@ -64,7 +68,23 @@ async function main() {
       continue;
     }
 
-    let calls = result.map((t, index) => {
+    let contributions: { [paraId: string]: ContributionTask } = {};
+    for (let task of result) {
+      if (!contributions[task.paraId.toString()]) {
+        contributions[task.paraId] = task;
+        continue;
+      }
+
+      let existTask = contributions[task.paraId.toString()];
+      existTask.id = `${existTask.id}#${task.id}`;
+      existTask.amount = (
+        BigInt(existTask.amount) + BigInt(task.amount)
+      ).toString();
+    }
+
+    const tasks: ContributionTask[] = Object.values(contributions);
+
+    let calls = tasks.map((t, index) => {
       logger.info(`Process tx with ${t.id}`);
       // batchAll[
       //  remark(previous_hash)
