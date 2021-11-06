@@ -38,7 +38,7 @@ export async function fetchContributions(): Promise<ContributionTask[] | null> {
       query {
         dotContributions(
           orderBy: BLOCK_HEIGHT_ASC
-          first: 100
+          first: 5
           filter: {
             transactionExecuted: { equalTo: false }
             isPending: { equalTo: false }
