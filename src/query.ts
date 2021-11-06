@@ -42,6 +42,7 @@ export async function fetchContributions(): Promise<ContributionTask[] | null> {
           filter: {
             transactionExecuted: { equalTo: false }
             isPending: { equalTo: false }
+            paraId: { notEqualTo: 2004 }
           }
         ) {
           nodes {
