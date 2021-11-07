@@ -62,29 +62,22 @@ async function main() {
   await waitSubqueryIndexBlock(block.header.number.toNumber());
 
   while (true) {
-    const result = await fetchContributions();
+    const funds = await api.query.crowdloan.funds.entries();
+    const keys = funds.map(([key, _]) => parseInt(key.args.toString()));
+    logger.info(`Funds are ${keys}`);
+    const availableTasks = await Promise.all(
+      keys
+        .filter((k) => k !== 2004)
+        .map(async (key) => await fetchContributions(key))
+    );
+
+    const result: ContributionTask[] = availableTasks.flat()!!;
     if (!result || result.length == 0) {
       await sleep(6000);
       continue;
     }
 
-    let contributions: { [paraId: string]: ContributionTask } = {};
-    for (let task of result) {
-      if (!contributions[task.paraId.toString()]) {
-        contributions[task.paraId] = task;
-        continue;
-      }
-
-      let existTask = contributions[task.paraId.toString()];
-      existTask.id = `${existTask.id}#${task.id}`;
-      existTask.amount = (
-        BigInt(existTask.amount) + BigInt(task.amount)
-      ).toString();
-    }
-
-    const tasks: ContributionTask[] = Object.values(contributions);
-
-    let calls = tasks.map((t, index) => {
+    let calls = result.map((t, index) => {
       logger.info(`Process tx with ${t.id}`);
       // batchAll[
       //  remark(previous_hash)

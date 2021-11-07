@@ -27,7 +27,9 @@ export async function nextProcessBlock(): Promise<number> {
 }
 
 // cannot get last task committed.
-export async function fetchContributions(): Promise<ContributionTask[] | null> {
+export async function fetchContributions(
+  paraId: number
+): Promise<ContributionTask[]> {
   logger.debug("Enter fetch Contribution");
 
   const {
@@ -41,8 +43,7 @@ export async function fetchContributions(): Promise<ContributionTask[] | null> {
           first: 5
           filter: {
             transactionExecuted: { equalTo: false }
-            isPending: { equalTo: false }
-            paraId: { notEqualTo: 2004 }
+            paraId: { equalTo: ${paraId} }
           }
         ) {
           nodes {
@@ -55,6 +56,7 @@ export async function fetchContributions(): Promise<ContributionTask[] | null> {
       }
     `
   );
-  logger.debug(`Fetch ${nodes.length} tasks`);
+  logger.debug(`Fetch ${nodes.length} tasks of ${paraId}`);
+  nodes.forEach((node: ContributionTask) => logger.debug(`Task: ${node.id}`));
   return nodes;
 }
