@@ -13,6 +13,8 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const { PROXIED_ACCOUNT, PROXY_ACCOUNT_SEED, RELAY_ENDPINT } = process.env;
 
+const WHITELIST = [2006, 2012, 2013, 2002, 2008];
+
 async function waitSubqueryIndexBlock(height: number) {
   while (true) {
     const nextBlockHeight = await nextProcessBlock();
@@ -67,7 +69,7 @@ async function main() {
     logger.info(`Funds are ${keys}`);
     const availableTasks = await Promise.all(
       keys
-        .filter((k) => k !== 2004)
+        .filter((k) => WHITELIST.includes(k))
         .map(async (key) => await fetchContributions(key))
     );
 
