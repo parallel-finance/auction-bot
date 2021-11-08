@@ -40,7 +40,7 @@ export async function fetchContributions(
       query {
         dotContributions(
           orderBy: BLOCK_HEIGHT_ASC
-          first: 5
+          first: 100
           filter: {
             transactionExecuted: { equalTo: false }
             paraId: { equalTo: ${paraId} }
