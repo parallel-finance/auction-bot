@@ -64,6 +64,10 @@ async function main() {
   await waitSubqueryIndexBlock(block.header.number.toNumber());
 
   while (true) {
+    if (!api.isConnected) {
+      logger.error("Websocket connection is broken");
+      process.exit(1);
+    }
     const funds = await api.query.crowdloan.funds.entries();
     const keys = funds.map(([key, _]) => parseInt(key.args.toString()));
     logger.info(`Funds are ${keys}`);
