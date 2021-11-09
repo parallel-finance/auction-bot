@@ -13,7 +13,7 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const { PROXIED_ACCOUNT, PROXY_ACCOUNT_SEED, RELAY_ENDPINT } = process.env;
 
-const WHITELIST = [2006, 2012, 2013, 2002, 2008];
+const WHITELIST = [2006, 2012, 2013, 2002, 2008, 2015];
 
 async function waitSubqueryIndexBlock(height: number) {
   while (true) {
