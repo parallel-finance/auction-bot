@@ -65,7 +65,7 @@ async function main() {
 
   while (true) {
     if (!api.isConnected) {
-      logger.error("Websocket connection is not broken");
+      logger.error("Websocket connection is broken");
       process.exit(1);
     }
     const funds = await api.query.crowdloan.funds.entries();
