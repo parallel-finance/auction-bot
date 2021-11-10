@@ -30,6 +30,12 @@ async function waitSubqueryIndexBlock(height: number) {
 
 async function main() {
   const provider = new WsProvider(RELAY_ENDPINT);
+
+  provider.on("error", () => {
+    logger.error("Websocket disconnect");
+    process.exit(1);
+  });
+
   logger.info(`Connect to ${RELAY_ENDPINT}`);
   const api = await ApiPromise.create({
     provider,
@@ -63,10 +69,6 @@ async function main() {
   await waitSubqueryIndexBlock(block.header.number.toNumber());
 
   while (true) {
-    if (!api.isConnected) {
-      logger.error("Websocket connection is broken");
-      process.exit(1);
-    }
     const funds = await api.query.crowdloan.funds.entries();
     const keys = funds.map(([key, _]) => parseInt(key.args.toString()));
     logger.info(`Funds are ${keys}`);
