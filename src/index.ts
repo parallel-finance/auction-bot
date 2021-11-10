@@ -12,7 +12,7 @@ dotenv.config();
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const { PROXIED_ACCOUNT, PROXY_ACCOUNT_SEED, RELAY_ENDPINT } = process.env;
+const { PROXY_ACCOUNT_SEED, RELAY_ENDPINT } = process.env;
 
 async function waitSubqueryIndexBlock(height: number) {
   while (true) {

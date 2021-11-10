@@ -18,4 +18,6 @@ export const WHITELIST = {
   2013: defaultExecutor,
   2002: defaultExecutor,
   2008: defaultExecutor,
+  2015: defaultExecutor,
+  2018: defaultExecutor,
 };
