@@ -6,14 +6,13 @@ import {
 import { logger } from "./logger";
 import { ApiPromise, WsProvider, Keyring } from "@polkadot/api";
 import type { SubmittableExtrinsic } from "@polkadot/api/submittable/types";
+import { WHITELIST } from "./executor";
 import dotenv from "dotenv";
 dotenv.config();
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const { PROXIED_ACCOUNT, PROXY_ACCOUNT_SEED, RELAY_ENDPINT } = process.env;
-
-const WHITELIST = [2006, 2012, 2013, 2002, 2008, 2015, 2018];
+const { PROXY_ACCOUNT_SEED, RELAY_ENDPINT } = process.env;
 
 async function waitSubqueryIndexBlock(height: number) {
   while (true) {
@@ -31,6 +30,12 @@ async function waitSubqueryIndexBlock(height: number) {
 
 async function main() {
   const provider = new WsProvider(RELAY_ENDPINT);
+
+  provider.on("error", () => {
+    logger.error("Websocket disconnect");
+    process.exit(1);
+  });
+
   logger.info(`Connect to ${RELAY_ENDPINT}`);
   const api = await ApiPromise.create({
     provider,
@@ -64,16 +69,12 @@ async function main() {
   await waitSubqueryIndexBlock(block.header.number.toNumber());
 
   while (true) {
-    if (!api.isConnected) {
-      logger.error("Websocket connection is broken");
-      process.exit(1);
-    }
     const funds = await api.query.crowdloan.funds.entries();
     const keys = funds.map(([key, _]) => parseInt(key.args.toString()));
     logger.info(`Funds are ${keys}`);
     const availableTasks = await Promise.all(
       keys
-        .filter((k) => WHITELIST.includes(k))
+        .filter((k) => k in WHITELIST)
         .map(async (key) => await fetchContributions(key))
     );
 
@@ -83,21 +84,10 @@ async function main() {
       continue;
     }
 
-    let calls = result.map((t, index) => {
+    const calls = result.map(async (t, index) => {
       logger.info(`Process tx with ${t.id}`);
-      // batchAll[
-      //  remark(previous_hash)
-      //  proxy(contribute(amount))
-      // ]
-      let txs = [
-        api.tx.system.remark(t.id),
-        api.tx.proxy.proxy(
-          PROXIED_ACCOUNT as string,
-          null,
-          api.tx.crowdloan.contribute(t.paraId, t.amount, null)
-        ),
-      ];
-      return sendTxAndWaitTillFinalized(api.tx.utility.batchAll(txs), index);
+      const txs = await WHITELIST[t.paraId](api, t);
+      return sendTxAndWaitTillFinalized(txs, index);
     });
 
     const callResults = await Promise.all(calls);
