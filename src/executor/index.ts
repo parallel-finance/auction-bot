@@ -1,6 +1,8 @@
 import { ApiPromise } from "@polkadot/api";
 import type { ContributionTask } from "../query";
 
+export type Executor = typeof defaultExecutor;
+
 const defaultExecutor = async (api: ApiPromise, task: ContributionTask) => {
   return api.tx.utility.batchAll([
     api.tx.system.remark(task.id),
@@ -12,7 +14,7 @@ const defaultExecutor = async (api: ApiPromise, task: ContributionTask) => {
   ]);
 };
 
-export const WHITELIST = {
+export const WHITELIST: { [paraId: number]: Executor } = {
   2006: defaultExecutor,
   2012: defaultExecutor,
   2013: defaultExecutor,

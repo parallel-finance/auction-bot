@@ -82,9 +82,9 @@ async function main() {
       continue;
     }
 
-    const calls = result.map((t, index) => {
+    const calls = result.map(async (t, index) => {
       logger.info(`Process tx with ${t.id}`);
-      const txs = WHITELIST[t.paraId](t);
+      const txs = await WHITELIST[t.paraId](api, t);
       return sendTxAndWaitTillFinalized(txs, index);
     });
 
