@@ -66,7 +66,7 @@ async function main() {
   };
 
   const { block } = await api.rpc.chain.getBlock();
-  await waitSubqueryIndexBlock(block.header.number.toNumber());
+  // await waitSubqueryIndexBlock(block.header.number.toNumber());
 
   while (true) {
     const funds = await api.query.crowdloan.funds.entries();
@@ -84,13 +84,16 @@ async function main() {
       continue;
     }
 
-    const calls = result.map(async (t, index) => {
-      logger.info(`Process tx with ${t.id}`);
-      const txs = await WHITELIST[t.paraId](api, t);
-      return sendTxAndWaitTillFinalized(txs, index);
-    });
+    const calls = result
+      .map(async (t, index) => {
+        logger.info(`Process tx with ${t.id}`);
+        const txs = await WHITELIST[t.paraId](api, t);
+        if (!txs) return null;
+        return sendTxAndWaitTillFinalized(txs, index);
+      })
+      .filter((t) => !!t);
 
-    const callResults = await Promise.all(calls);
+    const callResults = (await Promise.all(calls)) as number[];
     const finalizedBlock = Math.max(...callResults);
 
     await waitSubqueryIndexBlock(finalizedBlock);

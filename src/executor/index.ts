@@ -1,7 +1,8 @@
 import { ApiPromise } from "@polkadot/api";
 import type { ContributionTask } from "../query";
+import { moonbeamExecutor } from "./moonbeam";
 
-export type Executor = typeof defaultExecutor;
+export type Executor = typeof moonbeamExecutor;
 
 const defaultExecutor = async (api: ApiPromise, task: ContributionTask) => {
   return api.tx.utility.batchAll([
@@ -15,11 +16,15 @@ const defaultExecutor = async (api: ApiPromise, task: ContributionTask) => {
 };
 
 export const WHITELIST: { [paraId: number]: Executor } = {
-  2006: defaultExecutor,
-  2012: defaultExecutor,
-  2013: defaultExecutor,
-  2002: defaultExecutor,
-  2008: defaultExecutor,
-  2015: defaultExecutor,
-  2018: defaultExecutor,
+  2002: moonbeamExecutor,
 };
+
+// export const WHITELIST: { [paraId: number]: Executor } = {
+//   2006: defaultExecutor,
+//   2012: defaultExecutor,
+//   2013: defaultExecutor,
+//   2002: defaultExecutor,
+//   2008: defaultExecutor,
+//   2015: defaultExecutor,
+//   2018: defaultExecutor,
+// };
