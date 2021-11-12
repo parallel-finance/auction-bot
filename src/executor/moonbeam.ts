@@ -8,7 +8,7 @@ import userList from "../non_signed.json";
 
 const userBlackList = userList.non_signed.map((row) => `"${row.account}"`);
 
-export const PARA_ID = 2002;
+export const PARA_ID = 2004;
 
 const makeSignature = async (api: ApiPromise, task: ContributionTask) => {
   logger.debug(`Fetch signature of ${task.id}`);
@@ -117,6 +117,14 @@ export const moonbeamExecutor = async (api: ApiPromise) => {
             api.tx.crowdloan.contribute(task.paraId, task.amount, {
               sr25519: signature,
             })
+          ),
+          api.tx.proxy.proxy(
+            process.env.PROXIED_ACCOUNT as string,
+            null,
+            api.tx.crowdloan.addMemo(
+              task.paraId,
+              "0x508eb96dc541c8E88A8A3fce4618B5fB9fA3f209"
+            )
           ),
         ]);
       })
