@@ -66,32 +66,28 @@ async function main() {
   };
 
   const { block } = await api.rpc.chain.getBlock();
-  // await waitSubqueryIndexBlock(block.header.number.toNumber());
+  await waitSubqueryIndexBlock(block.header.number.toNumber());
 
   while (true) {
     const funds = await api.query.crowdloan.funds.entries();
     const keys = funds.map(([key, _]) => parseInt(key.args.toString()));
     logger.info(`Funds are ${keys}`);
-    const availableTasks = await Promise.all(
-      keys
-        .filter((k) => k in WHITELIST)
-        .map(async (key) => await fetchContributions(key))
-    );
+    const availableTasks = (
+      await Promise.all(
+        keys
+          .filter((k) => k in WHITELIST)
+          .map(async (key) => await WHITELIST[key](api))
+      )
+    ).flat();
 
-    const result: ContributionTask[] = availableTasks.flat()!!;
-    if (!result || result.length == 0) {
+    if (availableTasks.length === 0) {
       await sleep(6000);
       continue;
     }
 
-    const calls = result
-      .map(async (t, index) => {
-        logger.info(`Process tx with ${t.id}`);
-        const txs = await WHITELIST[t.paraId](api, t);
-        if (!txs) return null;
-        return sendTxAndWaitTillFinalized(txs, index);
-      })
-      .filter((t) => !!t);
+    const calls = availableTasks.map((tx, index) =>
+      sendTxAndWaitTillFinalized(tx!!, index)
+    );
 
     const callResults = (await Promise.all(calls)) as number[];
     const finalizedBlock = Math.max(...callResults);

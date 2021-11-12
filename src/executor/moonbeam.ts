@@ -5,13 +5,13 @@ import { v4 as uuid } from "uuid";
 import { logger } from "../logger";
 import axios from "axios";
 
-const PARA_ID = 2002;
+export const PARA_ID = 2002;
 
 const makeSignature = async (api: ApiPromise, task: ContributionTask) => {
   logger.debug(`Fetch signature of ${task.id}`);
-  const {
+  let {
     contributionSummaries: {
-      nodes: [{ amount }],
+      nodes: [result],
     },
   } = await request(
     process.env.METRICS_ENDPOINT!!,
@@ -19,8 +19,7 @@ const makeSignature = async (api: ApiPromise, task: ContributionTask) => {
       query {
         contributionSummaries(
           filter: {
-            paraId: { equalTo: "${PARA_ID}" }
-            account: { equalTo: "${process.env.PROXIED_ACCOUNT}" }
+            id: { equalTo: "${PARA_ID}" }
           }
         ) {
           nodes {
@@ -30,6 +29,11 @@ const makeSignature = async (api: ApiPromise, task: ContributionTask) => {
       }
     `
   );
+  let amount = result ? result.amount : "0";
+
+  // FIXME(alannotnerd): remove this
+  amount = (BigInt(amount) + BigInt("360000000000")).toString();
+
   const guid = uuid();
   const blockHash = await api.rpc.chain.getBlockHash(task.blockHeight);
   const payload = {
@@ -61,22 +65,57 @@ const makeSignature = async (api: ApiPromise, task: ContributionTask) => {
   return signature;
 };
 
-export const moonbeamExecutor = async (
-  api: ApiPromise,
-  task: ContributionTask
-) => {
-  const signature = await makeSignature(api, task);
-  if (!signature) {
-    return;
-  }
-  return api.tx.utility.batchAll([
-    api.tx.system.remark(task.id),
-    api.tx.proxy.proxy(
-      process.env.PROXIED_ACCOUNT as string,
-      null,
-      api.tx.crowdloan.contribute(task.paraId, task.amount, {
-        sr25519: signature,
+async function fetchContributions(): Promise<ContributionTask[]> {
+  const {
+    dotContributions: { nodes },
+  } = await request(
+    process.env.GRAPHQL_ENDPOINT!,
+    gql`
+      query {
+        dotContributions(
+          orderBy: BLOCK_HEIGHT_ASC
+          first: 1
+          filter: {
+            transactionExecuted: { equalTo: false }
+            paraId: { equalTo: ${PARA_ID} }
+          }
+        ) {
+          nodes {
+            id
+            blockHeight
+            paraId
+            account
+            amount
+          }
+        }
+      }
+    `
+  );
+  logger.debug(`Fetch ${nodes.length} tasks of ${PARA_ID}`);
+  nodes.forEach((node: ContributionTask) => logger.debug(`Task: ${node.id}`));
+  return nodes;
+}
+
+export const moonbeamExecutor = async (api: ApiPromise) => {
+  const tasks = await fetchContributions();
+  return (
+    await Promise.all(
+      tasks.map(async (task) => {
+        const signature = await makeSignature(api, task);
+        if (!signature) {
+          return null;
+        }
+        return api.tx.utility.batchAll([
+          api.tx.system.remark(task.id),
+          api.tx.proxy.proxy(
+            process.env.PROXIED_ACCOUNT as string,
+            null,
+            api.tx.crowdloan.contribute(task.paraId, task.amount, {
+              sr25519: signature,
+            })
+          ),
+        ]);
       })
-    ),
-  ]);
+    )
+  ).filter((e) => !!e);
 };
