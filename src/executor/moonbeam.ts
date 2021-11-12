@@ -4,6 +4,9 @@ import { ContributionTask } from "../query";
 import { v4 as uuid } from "uuid";
 import { logger } from "../logger";
 import axios from "axios";
+import userList from "../non_signed.json";
+
+const userBlackList = userList.non_signed.map((row) => `"${row.account}"`);
 
 export const PARA_ID = 2002;
 
@@ -78,6 +81,7 @@ async function fetchContributions(): Promise<ContributionTask[]> {
           filter: {
             transactionExecuted: { equalTo: false }
             paraId: { equalTo: ${PARA_ID} }
+            account: { notIn:  [${userBlackList}]}
           }
         ) {
           nodes {

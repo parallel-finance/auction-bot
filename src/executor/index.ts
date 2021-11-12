@@ -1,6 +1,6 @@
 import { ApiPromise } from "@polkadot/api";
 import { logger } from "../logger";
-import { ContributionTask, fetchContributions } from "../query";
+import { fetchContributions } from "../query";
 import { moonbeamExecutor } from "./moonbeam";
 
 export type Executor = typeof moonbeamExecutor;
