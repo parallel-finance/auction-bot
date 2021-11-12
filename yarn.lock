@@ -359,6 +359,15 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/axios@npm:^0.14.0":
+  version: 0.14.0
+  resolution: "@types/axios@npm:0.14.0"
+  dependencies:
+    axios: "*"
+  checksum: 12a230b9404055d81804cb57fe4739b2317111b28a39e2477b2513250e8b85725e6f6ce509fc2a9494a6da60facb8d80df875fcd747f62f6c3abebc7db60ae66
+  languageName: node
+  linkType: hard
+
 "@types/bn.js@npm:^4.11.6":
   version: 4.11.6
   resolution: "@types/bn.js@npm:4.11.6"
@@ -382,6 +391,13 @@ __metadata:
   version: 16.11.1
   resolution: "@types/node@npm:16.11.1"
   checksum: 22cea470b89292810733b8b9fc1b6a1873bc3ed4d4cdf2f25e777dc607994bd7c12e64166d1a66dd5924734192b0a891b6aeb6813aa935f731345f4086234375
+  languageName: node
+  linkType: hard
+
+"@types/uuid@npm:^8.3.1":
+  version: 8.3.1
+  resolution: "@types/uuid@npm:8.3.1"
+  checksum: b41bdc5e86c6f0f1899306be10455636da0f2168c9489b869edd6837ddeb7c0e501b1ff7d857402462986bada2a379125743dd895fa801d03437cd632116a373
   languageName: node
   linkType: hard
 
@@ -517,24 +533,26 @@ __metadata:
   dependencies:
     "@polkadot/api": ^6.4.2
     "@polkadot/types": ^6.4.2
+    "@types/axios": ^0.14.0
+    "@types/uuid": ^8.3.1
     "@urql/core": ^2.3.3
-    axios: ^0.23.0
+    axios: ^0.24.0
     dotenv: ^10.0.0
     graphql: ^15.6.1
     graphql-request: ^3.6.1
-    node-fetch: ^3.0.0
     ts-node: ^10.4.0
     typescript: ^4.4.4
+    uuid: ^8.3.2
     winston: ^3.3.3
   languageName: unknown
   linkType: soft
 
-"axios@npm:^0.23.0":
-  version: 0.23.0
-  resolution: "axios@npm:0.23.0"
+"axios@npm:*, axios@npm:^0.24.0":
+  version: 0.24.0
+  resolution: "axios@npm:0.24.0"
   dependencies:
     follow-redirects: ^1.14.4
-  checksum: 879f61022bd825da2a7ebb72410bc528683ba54c140436baa0b924b7cab02ec0919fe64a04a546f482a75f5fd570b77884f9826764a95f2fd88265e61dcb70db
+  checksum: 468cf496c08a6aadfb7e699bebdac02851e3043d4e7d282350804ea8900e30d368daa6e3cd4ab83b8ddb5a3b1e17a5a21ada13fc9cebd27b74828f47a4236316
   languageName: node
   linkType: hard
 
@@ -802,13 +820,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"data-uri-to-buffer@npm:^3.0.1":
-  version: 3.0.1
-  resolution: "data-uri-to-buffer@npm:3.0.1"
-  checksum: c59c3009686a78c071806b72f4810856ec28222f0f4e252aa495ec027ed9732298ceea99c50328cf59b151dd34cbc3ad6150bbb43e41fc56fa19f48c99e9fc30
-  languageName: node
-  linkType: hard
-
 "debug@npm:4, debug@npm:^4.1.0, debug@npm:^4.3.1":
   version: 4.3.2
   resolution: "debug@npm:4.3.2"
@@ -985,15 +996,6 @@ __metadata:
   version: 4.2.1
   resolution: "fecha@npm:4.2.1"
   checksum: 26993474949d94cd2de5eee7dfe283d671d5cd61acdba8819df478cbc86495273363f4a7e98d15ee51563110a38328d268982a6e9048169bce8f15aeba5931f9
-  languageName: node
-  linkType: hard
-
-"fetch-blob@npm:^3.1.2":
-  version: 3.1.2
-  resolution: "fetch-blob@npm:3.1.2"
-  dependencies:
-    web-streams-polyfill: ^3.0.3
-  checksum: 3e3717cf30da9f204aee83dded63f1a9f9c8bda7a0dc59648f89eeb1e88ee592231f4d922e1f119e1390383520768594dd3a1fe5e844f2f2f014d17ce04213a5
   languageName: node
   linkType: hard
 
@@ -1540,16 +1542,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-fetch@npm:^3.0.0":
-  version: 3.0.0
-  resolution: "node-fetch@npm:3.0.0"
-  dependencies:
-    data-uri-to-buffer: ^3.0.1
-    fetch-blob: ^3.1.2
-  checksum: 50224bf682a0bc3d44faee0f38df6269d8ae646de343595ef37f9d94b4322d3763a49819fb7b2df9330fcae16e0a20e5fb129dfed8725cf0e8f720277db7611c
-  languageName: node
-  linkType: hard
-
 "node-gyp-build@npm:^4.3.0":
   version: 4.3.0
   resolution: "node-gyp-build@npm:4.3.0"
@@ -2092,10 +2084,12 @@ typescript@^4.4.4:
   languageName: node
   linkType: hard
 
-"web-streams-polyfill@npm:^3.0.3":
-  version: 3.1.1
-  resolution: "web-streams-polyfill@npm:3.1.1"
-  checksum: dac85f0a990fb1ddcd15e2eda8ce4696bc9bc567e34cfdaeb9e740e26417d8649a6f466468907f50fd6e09967c25e0cf1f296c30aef9650ab7b118d5f69fb176
+"uuid@npm:^8.3.2":
+  version: 8.3.2
+  resolution: "uuid@npm:8.3.2"
+  bin:
+    uuid: dist/bin/uuid
+  checksum: 5575a8a75c13120e2f10e6ddc801b2c7ed7d8f3c8ac22c7ed0c7b2ba6383ec0abda88c905085d630e251719e0777045ae3236f04c812184b7c765f63a70e58df
   languageName: node
   linkType: hard
 

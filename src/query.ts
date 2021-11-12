@@ -6,24 +6,32 @@ type Maybe<T> = T | null;
 export interface ContributionTask {
   id: string;
   blockHeight: number;
+  account: string;
   paraId: number;
   amount: string;
 }
 
 export async function nextProcessBlock(): Promise<number> {
-  const {
-    _metadata: { lastProcessedHeight },
-  } = await request(
+  const ENDPOINTS = [
     process.env.GRAPHQL_ENDPOINT!,
-    gql`
-      query {
-        _metadata {
-          lastProcessedHeight
-        }
-      }
-    `
+    process.env.METRICS_ENDPOINT!,
+  ];
+
+  const lastHeights: number[] = await Promise.all(
+    ENDPOINTS.map((endpoint) =>
+      request(
+        endpoint,
+        gql`
+          query {
+            _metadata {
+              lastProcessedHeight
+            }
+          }
+        `
+      ).then(({ _metadata: { lastProcessedHeight } }) => lastProcessedHeight)
+    )
   );
-  return lastProcessedHeight;
+  return Math.min(...lastHeights);
 }
 
 // cannot get last task committed.
@@ -50,6 +58,7 @@ export async function fetchContributions(
             id
             blockHeight
             paraId
+            account
             amount
           }
         }
