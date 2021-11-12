@@ -4,7 +4,7 @@ import { ContributionTask } from "../query";
 import { v4 as uuid } from "uuid";
 import { logger } from "../logger";
 import axios from "axios";
-import userList from "../non_signed.json";
+import userList from "../non_signed";
 
 const userBlackList = userList.non_signed.map((row) => `"${row.account}"`);
 
@@ -13,14 +13,14 @@ export const PARA_ID = 2004;
 const makeSignature = async (api: ApiPromise, task: ContributionTask) => {
   logger.debug(`Fetch signature of ${task.id}`);
   let {
-    contributionSummaries: {
+    moonbeanContributions: {
       nodes: [result],
     },
   } = await request(
-    process.env.METRICS_ENDPOINT!!,
+    process.env.GRAPHQL_ENDPOINT!!,
     gql`
       query {
-        contributionSummaries(
+        moonbeanContributions(
           filter: {
             id: { equalTo: "${PARA_ID}" }
           }
@@ -49,15 +49,21 @@ const makeSignature = async (api: ApiPromise, task: ContributionTask) => {
   };
   logger.debug(`Make signature with payload: ${JSON.stringify(payload)}`);
   const res = await axios
-    .post(process.env.SIGNATURE_ENDPOINT as string, payload, {
-      headers: {
-        "X-API-KEY": process.env.MOONBEAM_API_KEY as string,
-        "Content-Type": "application/json; charset=utf-8",
-      },
-    })
+    .post(
+      `${process.env.SIGNATURE_ENDPOINT as string}/make-signature-lp`,
+      payload,
+      {
+        headers: {
+          "X-API-KEY": process.env.MOONBEAM_API_KEY as string,
+          "Content-Type": "application/json; charset=utf-8",
+        },
+      }
+    )
     .catch((err) => err.response);
   if (!res || res.status !== 200) {
-    logger.error(!!res ? "Connect failed" : res.data);
+    logger.error(
+      !res ? "Connect failed" : `Request failed: ${JSON.stringify(res.data)}`
+    );
     return;
   }
   const { signature } = res.data;
@@ -93,7 +99,6 @@ async function fetchContributions(): Promise<ContributionTask[]> {
     `
   );
   logger.debug(`Fetch ${nodes.length} tasks of ${PARA_ID}`);
-  nodes.forEach((node: ContributionTask) => logger.debug(`Task: ${node.id}`));
   return nodes;
 }
 
@@ -102,6 +107,7 @@ export const moonbeamExecutor = async (api: ApiPromise) => {
   return (
     await Promise.all(
       tasks.map(async (task) => {
+        logger.info(`Process tx of ${task.id}`);
         const signature = await makeSignature(api, task);
         if (!signature) {
           return null;

@@ -14,7 +14,7 @@ export interface ContributionTask {
 export async function nextProcessBlock(): Promise<number> {
   const ENDPOINTS = [
     process.env.GRAPHQL_ENDPOINT!,
-    process.env.METRICS_ENDPOINT!,
+    // process.env.METRICS_ENDPOINT!,
   ];
 
   const lastHeights: number[] = await Promise.all(
