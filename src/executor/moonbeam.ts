@@ -34,9 +34,6 @@ const makeSignature = async (api: ApiPromise, task: ContributionTask) => {
   );
   let amount = result ? result.amount : "0";
 
-  // FIXME(alannotnerd): remove this
-  amount = (BigInt(amount) + BigInt("360000000000")).toString();
-
   const guid = uuid();
   const blockHash = await api.rpc.chain.getBlockHash(task.blockHeight);
   const payload = {
