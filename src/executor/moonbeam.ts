@@ -79,7 +79,7 @@ async function fetchContributions(): Promise<ContributionTask[]> {
     gql`
       query {
         dotContributions(
-          orderBy: BLOCK_HEIGHT_ASC
+          orderBy: AMOUNT_DESC 
           first: 1
           filter: {
             transactionExecuted: { equalTo: false }
