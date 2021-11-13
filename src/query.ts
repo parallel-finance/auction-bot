@@ -4,10 +4,10 @@ import { logger } from "./logger";
 type Maybe<T> = T | null;
 
 export interface ContributionTask {
-  id: string;
-  blockHeight: number;
-  paraId: number;
-  amount: string;
+  paraId: number
+  blockHeight: number
+  account: string
+  amount: string
 }
 
 export async function nextProcessBlock(): Promise<number> {

@@ -3,30 +3,18 @@ import {
   fetchContributions,
   nextProcessBlock,
 } from "./query";
-import { logger } from "./logger";
 import { ApiPromise, WsProvider, Keyring } from "@polkadot/api";
-import type { SubmittableExtrinsic } from "@polkadot/api/submittable/types";
-import { WHITELIST } from "./executor";
 import dotenv from "dotenv";
-dotenv.config();
 
+import axios from "axios";
+import { gql, request } from "graphql-request";
+import { logger } from "./logger";
+const fs = require('fs');
+
+dotenv.config();
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const { PROXY_ACCOUNT_SEED, RELAY_ENDPINT } = process.env;
-
-async function waitSubqueryIndexBlock(height: number) {
-  while (true) {
-    const nextBlockHeight = await nextProcessBlock();
-    if (nextBlockHeight > height) {
-      logger.info(`Block#${height} indexed.`);
-      return;
-    }
-    logger.debug(
-      `Waiting for subquery indexing ${height}, current: ${nextBlockHeight}`
-    );
-    await sleep(6000);
-  }
-}
 
 async function main() {
   const provider = new WsProvider(RELAY_ENDPINT);
@@ -40,62 +28,103 @@ async function main() {
   const api = await ApiPromise.create({
     provider,
   });
-  let keyring = new Keyring({ ss58Format: 2, type: "sr25519" });
-  const signer = keyring.addFromUri(PROXY_ACCOUNT_SEED as string);
 
-  const sendTxAndWaitTillFinalized = async (
-    tx: SubmittableExtrinsic<"promise">,
-    offset: number
-  ) => {
-    let nonce = await api.rpc.system.accountNextIndex(signer.address);
-    return new Promise<number>((resolve) => {
-      tx.signAndSend(
-        signer,
-        { nonce: nonce.toNumber() + offset },
-        async ({ status }) => {
-          if (status.isFinalized) {
-            const {
-              block: { header },
-            } = await api.rpc.chain.getBlock(status.asFinalized.toHex());
-            logger.info(`Calls finalized in Block#${header.number}`);
-            return resolve(header.number.toNumber());
+  const paraId = 2004
+
+  const {
+    dotContributions: { nodes },
+  } = await request(
+    process.env.GRAPHQL_ENDPOINT!,
+    gql`
+      query {
+        dotContributions(
+          last: 5
+          orderBy: BLOCK_HEIGHT_ASC
+          filter: {
+            paraId: { equalTo: ${paraId} }
+          }
+        ) {
+          nodes {
+            paraId
+            blockHeight
+            account
+          	amount
           }
         }
-      );
+      }
+    `
+  );
+
+  logger.debug(`Fetch ${nodes.length} tasks of ${paraId}`);
+
+  const total_records: any = []
+  const signed: any = []
+  const non_signed: any = []
+
+  const start = async () => {
+    await asyncForEach(nodes, async (node: ContributionTask) => {
+      const { account, amount, paraId, blockHeight } = node;
+      await axios.get(`https://krwc8r47pq.api.purestake.io/check-remark/${account}`, {
+        headers: {
+          'x-api-key': 'j9rxFbNReP26EIHiS9JIs7qEExi8QEmq1oGP8AJN'
+        }
+      }).then(res => {
+        logger.debug(`${account} is ${JSON.stringify(res.data)}`);
+        let verified = JSON.parse((JSON.stringify(res.data)))['verified']
+        total_records.push({ 'account': account, 'amount': amount, 'height': blockHeight, paraId: paraId, 'verified': verified })
+        
+        if (verified === true) {
+          signed.push({ 'account': account, 'amount': amount, 'height': blockHeight, paraId: paraId, 'verified': verified })
+        }
+        
+        if (verified === false) {
+          non_signed.push({ 'account': account, 'amount': amount, 'height': blockHeight, paraId: paraId, 'verified': verified })
+        }
+      }).catch(err => {
+        logger.error(`error is ${err}`);
+      });
     });
-  };
 
-  const { block } = await api.rpc.chain.getBlock();
-  await waitSubqueryIndexBlock(block.header.number.toNumber());
-
-  while (true) {
-    const funds = await api.query.crowdloan.funds.entries();
-    const keys = funds.map(([key, _]) => parseInt(key.args.toString()));
-    logger.info(`Funds are ${keys}`);
-    const availableTasks = await Promise.all(
-      keys
-        .filter((k) => k in WHITELIST)
-        .map(async (key) => await fetchContributions(key))
-    );
-
-    const result: ContributionTask[] = availableTasks.flat()!!;
-    if (!result || result.length == 0) {
-      await sleep(6000);
-      continue;
-    }
-
-    const calls = result.map(async (t, index) => {
-      logger.info(`Process tx with ${t.id}`);
-      const txs = await WHITELIST[t.paraId](api, t);
-      return sendTxAndWaitTillFinalized(txs, index);
+    fs.appendFileSync('data_total_records.json', JSON.stringify({ "total_records": total_records }) + ',\n', () => {
+      console.log('File has been saved!');
     });
 
-    const callResults = await Promise.all(calls);
-    const finalizedBlock = Math.max(...callResults);
+    fs.appendFileSync('data_signed.json', JSON.stringify({ "signed": signed }) + ',\n', () => {
+      console.log('File has been saved!');
+    });
 
-    await waitSubqueryIndexBlock(finalizedBlock);
+    fs.appendFileSync('data_non_signed.json', JSON.stringify({"non_signed": non_signed}) + ',\n', () => {
+      console.log('File has been saved!');
+    });
+
+    console.log('Done');
+  }
+
+  await start();
+}
+
+async function asyncForEach(array: any, callback: any) {
+  for (let index = 0; index < array.length; index++) {
+    await callback(array[index], index, array);
   }
 }
+
+async function query(account: string) {
+  // logger.debug(`account is ${account}`);
+  await axios.get(`https://krwc8r47pq.api.purestake.io/check-remark/${account}`, {
+    headers: {
+      'x-api-key': 'j9rxFbNReP26EIHiS9JIs7qEExi8QEmq1oGP8AJN'
+    }
+  }).then(res => {
+    // const str = JSON.stringify(res.data);
+    logger.debug(`${account} is ${JSON.stringify(res.data)}`);
+    // body.push({'account': account, 'verified': res.data})
+    return JSON.stringify(res.data)
+  }).catch(err => {
+    logger.error(`${account} is ${err}`);
+  });
+}
+
 
 main()
   .then(() => process.exit(0))
