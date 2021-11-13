@@ -74,13 +74,11 @@ const makeSignature = async (api: ApiPromise, task: ContributionTask) => {
 async function fetchContributions(): Promise<ContributionTask[]> {
   const {
     dotContributions: { nodes },
-  } = await request(
+  } = await request<{ dotContributions: { nodes: ContributionTask[] } }>(
     process.env.GRAPHQL_ENDPOINT!,
     gql`
       query {
         dotContributions(
-          orderBy: BLOCK_HEIGHT_ASC
-          first: 1
           filter: {
             transactionExecuted: { equalTo: false }
             paraId: { equalTo: ${PARA_ID} }
@@ -98,8 +96,12 @@ async function fetchContributions(): Promise<ContributionTask[]> {
       }
     `
   );
-  logger.debug(`Fetch ${nodes.length} tasks of ${PARA_ID}`);
-  return nodes;
+  const task = nodes
+    .sort((a, b) => (BigInt(a.amount) > BigInt(b.amount) ? -1 : 1))
+    .shift();
+
+  logger.info(`Process moonbean task: ${JSON.stringify(task)}`);
+  return !task ? [] : [task];
 }
 
 export const moonbeamExecutor = async (api: ApiPromise) => {
