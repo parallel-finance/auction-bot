@@ -38,7 +38,6 @@ async function main() {
     gql`
       query {
         dotContributions(
-          last: 5
           orderBy: BLOCK_HEIGHT_ASC
           filter: {
             paraId: { equalTo: ${paraId} }
