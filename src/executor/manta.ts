@@ -2,7 +2,7 @@ import { ApiPromise } from "@polkadot/api";
 import { logger } from "../logger";
 import { fetchContributions } from "../query";
 
-export const PARA_ID = 2005;
+export const PARA_ID = 2015;
 
 export const mantaExecutor = async (api: ApiPromise) => {
   const tasks = await fetchContributions(PARA_ID);
