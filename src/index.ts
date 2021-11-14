@@ -30,7 +30,9 @@ async function main() {
   });
 
   const paraId = 2004
-
+  // const begin_height = 7667905
+  // const end_height = 7693868
+  // blockHeight: {greaterThan: ${begin_height},  lessThan: ${end_height}}
   const {
     dotContributions: { nodes },
   } = await request(
