@@ -1,7 +1,8 @@
 import { ApiPromise } from "@polkadot/api";
 import { logger } from "../logger";
 import { fetchContributions } from "../query";
-import { moonbeamExecutor } from "./moonbeam";
+import { moonbeamExecutor, PARA_ID as MOONBEAM } from "./moonbeam";
+import { mantaExecutor, PARA_ID as MANTA } from "./manta";
 
 export type Executor = typeof moonbeamExecutor;
 
@@ -20,14 +21,14 @@ const defaultExecutor = async (api: ApiPromise, paraId: number) => {
   });
 };
 
-export const WHITELIST: { [paraId: number]: Executor } = {
-  2004: moonbeamExecutor,
-  2000: (api) => defaultExecutor(api, 2000),
-  2006: (api) => defaultExecutor(api, 2006),
-  2012: (api) => defaultExecutor(api, 2012),
-  2013: (api) => defaultExecutor(api, 2013),
-  2002: (api) => defaultExecutor(api, 2002),
-  2008: (api) => defaultExecutor(api, 2008),
-  2015: (api) => defaultExecutor(api, 2015),
-  2018: (api) => defaultExecutor(api, 2018),
-};
+export const WHITELIST: { [paraId: number]: Executor } = (() => ({
+  MOONBEAM: moonbeamExecutor,
+  2000: (api: ApiPromise) => defaultExecutor(api, 2000),
+  2006: (api: ApiPromise) => defaultExecutor(api, 2006),
+  2012: (api: ApiPromise) => defaultExecutor(api, 2012),
+  2013: (api: ApiPromise) => defaultExecutor(api, 2013),
+  2002: (api: ApiPromise) => defaultExecutor(api, 2002),
+  2008: (api: ApiPromise) => defaultExecutor(api, 2008),
+  MANTA: mantaExecutor,
+  2018: (api: ApiPromise) => defaultExecutor(api, 2018),
+}))();

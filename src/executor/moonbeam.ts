@@ -4,11 +4,11 @@ import { ContributionTask } from "../query";
 import { v4 as uuid } from "uuid";
 import { logger } from "../logger";
 import axios from "axios";
-import userList from "../non_signed";
+import userList from "../non-signed";
 
 const userBlackList = userList.non_signed.map((row) => `"${row.account}"`);
 
-export const PARA_ID = 2004;
+export const PARA_ID: number = 2004;
 
 const makeSignature = async (api: ApiPromise, task: ContributionTask) => {
   logger.debug(`Fetch signature of ${task.id}`);
