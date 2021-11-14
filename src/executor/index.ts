@@ -21,14 +21,14 @@ const defaultExecutor = async (api: ApiPromise, paraId: number) => {
   });
 };
 
-export const WHITELIST: { [paraId: number]: Executor } = (() => ({
-  MOONBEAM: moonbeamExecutor,
+export const WHITELIST: { [paraId: number]: Executor } = {
+  2004: moonbeamExecutor,
   2000: (api: ApiPromise) => defaultExecutor(api, 2000),
   2006: (api: ApiPromise) => defaultExecutor(api, 2006),
   2012: (api: ApiPromise) => defaultExecutor(api, 2012),
   2013: (api: ApiPromise) => defaultExecutor(api, 2013),
   2002: (api: ApiPromise) => defaultExecutor(api, 2002),
   2008: (api: ApiPromise) => defaultExecutor(api, 2008),
-  MANTA: mantaExecutor,
+  2015: mantaExecutor,
   2018: (api: ApiPromise) => defaultExecutor(api, 2018),
-}))();
+};
