@@ -4,11 +4,36 @@ import { ContributionTask } from "../query";
 import { v4 as uuid } from "uuid";
 import { logger } from "../logger";
 import axios from "axios";
-import userList from "../non-signed";
-
-const userBlackList = userList.non_signed.map((row) => `"${row.account}"`);
+import { redis } from "../index";
 
 export const PARA_ID: number = 2004;
+
+const checkIfSinged = async (
+  task: ContributionTask
+): Promise<boolean | undefined> => {
+  logger.debug(`Check remark of ${task.account}`);
+  const res = await axios
+    .get(
+      `${process.env.SIGNATURE_ENDPOINT as string}/check-remark/${
+        task.account
+      }`,
+      {
+        headers: {
+          "X-API-KEY": process.env.MOONBEAM_API_KEY as string,
+          "Content-Type": "application/json; charset=utf-8",
+        },
+      }
+    )
+    .catch((err) => err.response);
+  if (!res || res.status !== 200) {
+    logger.error(
+      !res ? "Connect failed" : `Request failed: ${JSON.stringify(res.data)}`
+    );
+    return;
+  }
+  const { verified } = res.data;
+  return verified;
+};
 
 const makeSignature = async (api: ApiPromise, task: ContributionTask) => {
   logger.debug(`Fetch signature of ${task.id}`);
@@ -82,7 +107,6 @@ async function fetchContributions(): Promise<ContributionTask[]> {
           filter: {
             transactionExecuted: { equalTo: false }
             paraId: { equalTo: ${PARA_ID} }
-            account: { notIn:  [${userBlackList}]}
           }
         ) {
           nodes {
@@ -96,9 +120,30 @@ async function fetchContributions(): Promise<ContributionTask[]> {
       }
     `
   );
-  const task = nodes
-    .sort((a, b) => (BigInt(a.amount) > BigInt(b.amount) ? -1 : 1))
-    .shift();
+
+  const tasks = nodes.sort((a, b) =>
+    BigInt(a.amount) > BigInt(b.amount) ? -1 : 1
+  );
+
+  const takeFirstSigned = async () => {
+    for (const task of tasks) {
+      if (await redis.sismember("userBlackList", task.account)) {
+        continue;
+      }
+      const result = await checkIfSinged(task);
+      if (typeof result === "undefined") {
+        continue;
+      }
+      if (!result) {
+        logger.info(`Add ${task.account} to blacklist`);
+        await redis.sadd("userBlackList", task.account);
+        continue;
+      }
+      return task;
+    }
+  };
+
+  const task = await takeFirstSigned();
 
   logger.info(`Process moonbean task: ${JSON.stringify(task)}`);
   return !task ? [] : [task];
