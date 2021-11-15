@@ -3,6 +3,7 @@ import { logger } from "../logger";
 import { fetchContributions } from "../query";
 import { moonbeamExecutor, PARA_ID as MOONBEAM } from "./moonbeam";
 import { mantaExecutor, PARA_ID as MANTA } from "./manta";
+import { darwiniaExecutor } from "./darwinia";
 
 export type Executor = typeof moonbeamExecutor;
 
@@ -31,4 +32,5 @@ export const WHITELIST: { [paraId: number]: Executor } = {
   2008: (api: ApiPromise) => defaultExecutor(api, 2008),
   2015: mantaExecutor,
   2018: (api: ApiPromise) => defaultExecutor(api, 2018),
+  2003: darwiniaExecutor,
 };
