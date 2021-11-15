@@ -20,7 +20,7 @@ export const darwiniaExecutor = async (api: ApiPromise) => {
         null,
         api.tx.crowdloan.addMemo(
           task.paraId,
-          "12uL7ZH5ixW7TqoeFZCKzttvj6NybSdNMD7GhYosKAd9FvcY"
+          "0x542555b01c6e8b58cc004317ddcd121bdcff6a538324dd51e131077f78db2306"
         )
       ),
     ]);
