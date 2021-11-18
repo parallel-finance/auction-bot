@@ -8,11 +8,9 @@ import { ApiPromise, WsProvider, Keyring } from "@polkadot/api";
 import type { SubmittableExtrinsic } from "@polkadot/api/submittable/types";
 import { WHITELIST } from "./executor";
 import Redis from "ioredis";
-import userList from "./non-signed";
 import dotenv from "dotenv";
 
 dotenv.config();
-const USER_BLACKLIST = userList.non_signed.map((row) => row.account);
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -48,12 +46,6 @@ async function main() {
   });
   let keyring = new Keyring({ ss58Format: 2, type: "sr25519" });
   const signer = keyring.addFromUri(PROXY_ACCOUNT_SEED as string);
-
-  if ((await redis.smembers("userBlackList")).length === 0) {
-    await Promise.all(
-      USER_BLACKLIST.map((record) => redis.sadd("userBlackList", record))
-    );
-  }
 
   const sendTxAndWaitTillFinalized = async (
     tx: SubmittableExtrinsic<"promise">,
