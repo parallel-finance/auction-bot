@@ -33,4 +33,5 @@ export const WHITELIST: { [paraId: number]: Executor } = {
   2015: mantaExecutor,
   2018: (api: ApiPromise) => defaultExecutor(api, 2018),
   2003: darwiniaExecutor,
+  2021: (api: ApiPromise) => defaultExecutor(api, 2021),
 };
