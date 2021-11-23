@@ -23,7 +23,7 @@ const defaultExecutor = async (api: ApiPromise, paraId: number) => {
 };
 
 export const WHITELIST: { [paraId: number]: Executor } = {
-  2004: moonbeamExecutor,
+  // 2004: moonbeamExecutor,
   2006: (api: ApiPromise) => defaultExecutor(api, 2006),
   2012: (api: ApiPromise) => defaultExecutor(api, 2012),
   2013: (api: ApiPromise) => defaultExecutor(api, 2013),
