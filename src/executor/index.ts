@@ -24,12 +24,7 @@ const defaultExecutor = async (api: ApiPromise, paraId: number) => {
 
 export const WHITELIST: { [paraId: number]: Executor } = {
   2013: (api: ApiPromise) => defaultExecutor(api, 2013),
+  2016: (api: ApiPromise) => defaultExecutor(api, 2016),
   2002: (api: ApiPromise) => defaultExecutor(api, 2002),
-  2008: (api: ApiPromise) => defaultExecutor(api, 2008),
-  2017: (api: ApiPromise) => defaultExecutor(api, 2017),
-  [MANTA]: mantaExecutor,
-  2018: (api: ApiPromise) => defaultExecutor(api, 2018),
-  [DARWINIA]: darwiniaExecutor,
-  2021: (api: ApiPromise) => defaultExecutor(api, 2021),
-  [NODLE]: nodleExecutor,
+  2100: (api: ApiPromise) => defaultExecutor(api, 2100),
 };
