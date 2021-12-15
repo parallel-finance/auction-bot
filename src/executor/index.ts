@@ -4,6 +4,7 @@ import { fetchContributions } from "../query";
 import { mantaExecutor, PARA_ID as MANTA } from "./manta";
 import { nodleExecutor, PARA_ID as NODLE } from "./nodle";
 import { darwiniaExecutor, PARA_ID as DARWINIA } from "./darwinia";
+import { interlayExecutor, PARA_ID as INTERLAY } from "./interlay";
 
 export type Executor = typeof mantaExecutor;
 
@@ -29,7 +30,9 @@ export const WHITELIST: { [paraId: number]: Executor } = {
   2017: (api: ApiPromise) => defaultExecutor(api, 2017),
   [MANTA]: mantaExecutor,
   2018: (api: ApiPromise) => defaultExecutor(api, 2018),
+  2028: (api: ApiPromise) => defaultExecutor(api, 2028),
   [DARWINIA]: darwiniaExecutor,
   2021: (api: ApiPromise) => defaultExecutor(api, 2021),
   [NODLE]: nodleExecutor,
+  [INTERLAY]: interlayExecutor,
 };
