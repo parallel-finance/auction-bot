@@ -5,6 +5,7 @@ import { mantaExecutor, PARA_ID as MANTA } from "./manta";
 import { nodleExecutor, PARA_ID as NODLE } from "./nodle";
 import { darwiniaExecutor, PARA_ID as DARWINIA } from "./darwinia";
 import { interlayExecutor, PARA_ID as INTERLAY } from "./interlay";
+import { centrifugeExecutor, PARA_ID as CENTRIFUGE } from "./centrifuge";
 
 export type Executor = typeof mantaExecutor;
 
@@ -41,4 +42,5 @@ export const WHITELIST: { [paraId: number]: Executor } = {
   [NODLE]: nodleExecutor,
   [COMPOSABLE]: defaultExecutorFactory(COMPOSABLE),
   [INTERLAY]: interlayExecutor,
+  [CENTRIFUGE]: centrifugeExecutor,
 };
