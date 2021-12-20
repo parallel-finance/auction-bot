@@ -7,6 +7,7 @@ import { darwiniaExecutor, PARA_ID as DARWINIA } from "./darwinia";
 import { interlayExecutor, PARA_ID as INTERLAY } from "./interlay";
 import { centrifugeExecutor, PARA_ID as CENTRIFUGE } from "./centrifuge";
 import { efinityFetcher, PARA_ID as EFINITY } from "./efinity";
+import { equilibriumExecutor, PARA_ID as EQUILIBRIUM } from "./equilibrium";
 
 export type Executor = typeof mantaExecutor;
 export type Fetcher = typeof fetchContributions;
@@ -36,6 +37,7 @@ const defaultExecutorFactory =
     defaultExecutor(api, paraId, fetcher);
 
 const COMPOSABLE = 2019;
+const COINVERSATION = 2027;
 
 export const WHITELIST: { [paraId: number]: Executor } = {
   2002: defaultExecutorFactory(2002),
@@ -46,4 +48,6 @@ export const WHITELIST: { [paraId: number]: Executor } = {
   [INTERLAY]: interlayExecutor,
   [CENTRIFUGE]: centrifugeExecutor,
   [EFINITY]: defaultExecutorFactory(EFINITY, efinityFetcher),
+  [EQUILIBRIUM]: equilibriumExecutor,
+  [COINVERSATION]: defaultExecutorFactory(COINVERSATION),
 };
