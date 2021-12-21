@@ -38,6 +38,7 @@ const defaultExecutorFactory =
 
 const COMPOSABLE = 2019;
 const COINVERSATION = 2027;
+const LITENTRY = 2013;
 
 export const WHITELIST: { [paraId: number]: Executor } = {
   2002: defaultExecutorFactory(2002),
@@ -50,4 +51,5 @@ export const WHITELIST: { [paraId: number]: Executor } = {
   [EFINITY]: defaultExecutorFactory(EFINITY, efinityFetcher),
   // [EQUILIBRIUM]: equilibriumExecutor,
   [COINVERSATION]: defaultExecutorFactory(COINVERSATION),
+  [LITENTRY]: defaultExecutorFactory(LITENTRY),
 };
