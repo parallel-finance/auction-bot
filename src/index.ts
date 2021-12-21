@@ -74,7 +74,13 @@ async function main() {
 
   while (true) {
     const funds = await api.query.crowdloan.funds.entries();
-    const keys = funds.map(([key, _]) => parseInt(key.args.toString()));
+    const { block } = await api.rpc.chain.getBlock();
+    const keys = funds
+      .map(([key, val]) => {
+        return [parseInt(key.args.toString()), (val.toJSON() as any)["end"]];
+      })
+      .filter(([_, endBlock]) => endBlock > block.header.number.toNumber())
+      .map(([key, _]) => key);
     logger.info(`Funds are ${keys}`);
     const availableTasks = (
       await Promise.all(
