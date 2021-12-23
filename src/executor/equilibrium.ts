@@ -20,7 +20,7 @@ export const equilibriumExecutor = async (api: ApiPromise) => {
         null,
         api.tx.crowdloan.addMemo(
           task.paraId,
-          "0x9ebc94ca272fc936ff8870a70ec9aa7cac25ecb5e428d14842f1e89b092f507c"
+          "0x81f06d1ca5f7094e8fb7398ca7c1af73310015b25b22e144ddbe5dc175cd26cb"
         )
       ),
     ]);

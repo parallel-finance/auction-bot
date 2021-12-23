@@ -49,7 +49,7 @@ export const WHITELIST: { [paraId: number]: Executor } = {
   [INTERLAY]: interlayExecutor,
   [CENTRIFUGE]: centrifugeExecutor,
   [EFINITY]: defaultExecutorFactory(EFINITY, efinityFetcher),
-  // [EQUILIBRIUM]: equilibriumExecutor,
+  [EQUILIBRIUM]: equilibriumExecutor,
   [COINVERSATION]: defaultExecutorFactory(COINVERSATION),
   [LITENTRY]: defaultExecutorFactory(LITENTRY),
 };
