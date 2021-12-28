@@ -40,6 +40,7 @@ const COMPOSABLE = 2019;
 const COINVERSATION = 2027;
 const LITENTRY = 2013;
 const PHALA = 2035;
+const SUBGAME = 2017;
 
 export const WHITELIST: { [paraId: number]: Executor } = {
   2002: defaultExecutorFactory(2002),
@@ -54,4 +55,5 @@ export const WHITELIST: { [paraId: number]: Executor } = {
   [COINVERSATION]: defaultExecutorFactory(COINVERSATION),
   [LITENTRY]: defaultExecutorFactory(LITENTRY),
   [PHALA]: defaultExecutorFactory(PHALA),
+  [SUBGAME]: defaultExecutorFactory(SUBGAME),
 };
