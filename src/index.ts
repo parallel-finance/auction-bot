@@ -9,6 +9,8 @@ import type { SubmittableExtrinsic } from "@polkadot/api/submittable/types";
 import { WHITELIST } from "./executor";
 import Redis from "ioredis";
 import dotenv from "dotenv";
+import { Option, u32 } from "@polkadot/types";
+import { ITuple } from "@polkadot/types/types";
 
 dotenv.config();
 
@@ -75,6 +77,19 @@ async function main() {
   while (true) {
     const funds = await api.query.crowdloan.funds.entries();
     const { block } = await api.rpc.chain.getBlock();
+    // Check if in vrf
+    const auctionInfo = (await api.query.auctions.auctionInfo()) as Option<
+      ITuple<[u32, u32]>
+    >;
+    const isInVrf =
+      auctionInfo.isSome &&
+      auctionInfo.unwrap()[1].toNumber() < block.header.number.toNumber();
+
+    if (!isInVrf) {
+      await sleep(6000);
+      continue;
+    }
+
     const keys = funds
       .map(([key, val]) => {
         return [parseInt(key.args.toString()), (val.toJSON() as any)["end"]];
@@ -82,6 +97,7 @@ async function main() {
       .filter(([_, endBlock]) => endBlock > block.header.number.toNumber())
       .map(([key, _]) => key);
     logger.info(`Funds are ${keys}`);
+
     const availableTasks = (
       await Promise.all(
         keys

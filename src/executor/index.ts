@@ -50,7 +50,6 @@ export const WHITELIST: { [paraId: number]: Executor } = {
   [COMPOSABLE]: defaultExecutorFactory(COMPOSABLE),
   [INTERLAY]: interlayExecutor,
   [CENTRIFUGE]: centrifugeExecutor,
-  [EFINITY]: defaultExecutorFactory(EFINITY, efinityFetcher),
   [EQUILIBRIUM]: equilibriumExecutor,
   [COINVERSATION]: defaultExecutorFactory(COINVERSATION),
   [LITENTRY]: defaultExecutorFactory(LITENTRY),
