@@ -85,7 +85,7 @@ async function main() {
       auctionInfo.isSome &&
       auctionInfo.unwrap()[1].toNumber() < block.header.number.toNumber();
 
-    if (!isInVrf) {
+    if (isInVrf) {
       await sleep(6000);
       continue;
     }
