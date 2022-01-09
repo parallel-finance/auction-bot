@@ -3,20 +3,20 @@ import {
   fetchContributions,
   nextProcessBlock,
 } from "./query";
-import { logger } from "./logger";
-import { ApiPromise, WsProvider, Keyring } from "@polkadot/api";
-import type { SubmittableExtrinsic } from "@polkadot/api/submittable/types";
-import { WHITELIST } from "./executor";
+import {logger} from "./logger";
+import {ApiPromise, WsProvider, Keyring} from "@polkadot/api";
+import type {SubmittableExtrinsic} from "@polkadot/api/submittable/types";
+import {WHITELIST} from "./executor";
 import Redis from "ioredis";
 import dotenv from "dotenv";
-import { Option, u32 } from "@polkadot/types";
-import { ITuple } from "@polkadot/types/types";
+import {Option, u32} from "@polkadot/types";
+import {ITuple} from "@polkadot/types/types";
 
 dotenv.config();
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const { PROXY_ACCOUNT_SEED, RELAY_ENDPINT } = process.env;
+const {PROXY_ACCOUNT_SEED, RELAY_ENDPINT} = process.env;
 
 async function waitSubqueryIndexBlock(height: number) {
   while (true) {
@@ -32,7 +32,7 @@ async function waitSubqueryIndexBlock(height: number) {
   }
 }
 
-export const redis = new Redis(process.env.REDIS_ENDPOINT, { password: "" });
+export const redis = new Redis(process.env.REDIS_ENDPOINT, {password: ""});
 
 async function main() {
   const provider = new WsProvider(RELAY_ENDPINT);
@@ -46,7 +46,7 @@ async function main() {
   const api = await ApiPromise.create({
     provider,
   });
-  let keyring = new Keyring({ ss58Format: 2, type: "sr25519" });
+  let keyring = new Keyring({ss58Format: 2, type: "sr25519"});
   const signer = keyring.addFromUri(PROXY_ACCOUNT_SEED as string);
 
   const sendTxAndWaitTillFinalized = async (
@@ -57,11 +57,11 @@ async function main() {
     return new Promise<number>((resolve) => {
       tx.signAndSend(
         signer,
-        { nonce: nonce.toNumber() + offset },
-        async ({ status }) => {
+        {nonce: nonce.toNumber() + offset},
+        async ({status}) => {
           if (status.isFinalized) {
             const {
-              block: { header },
+              block: {header},
             } = await api.rpc.chain.getBlock(status.asFinalized.toHex());
             logger.info(`Calls finalized in Block#${header.number}`);
             return resolve(header.number.toNumber());
@@ -71,24 +71,24 @@ async function main() {
     });
   };
 
-  const { block } = await api.rpc.chain.getBlock();
+  const {block} = await api.rpc.chain.getBlock();
   await waitSubqueryIndexBlock(block.header.number.toNumber());
 
   while (true) {
     const funds = await api.query.crowdloan.funds.entries();
-    const { block } = await api.rpc.chain.getBlock();
+    const {block} = await api.rpc.chain.getBlock();
     // Check if in vrf
-    const auctionInfo = (await api.query.auctions.auctionInfo()) as Option<
-      ITuple<[u32, u32]>
-    >;
-    const isInVrf =
-      auctionInfo.isSome &&
-      auctionInfo.unwrap()[1].toNumber() < block.header.number.toNumber();
-
-    if (isInVrf) {
-      await sleep(6000);
-      continue;
-    }
+    // const auctionInfo = (await api.query.auctions.auctionInfo()) as Option<
+    //   ITuple<[u32, u32]>
+    // >;
+    // const isInVrf =
+    //   auctionInfo.isSome &&
+    //   auctionInfo.unwrap()[1].toNumber() < block.header.number.toNumber();
+    //
+    // if (isInVrf) {
+    //   await sleep(6000);
+    //   continue;
+    // }
 
     const keys = funds
       .map(([key, val]) => {
