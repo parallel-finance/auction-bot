@@ -32,7 +32,7 @@ async function waitSubqueryIndexBlock(height: number) {
   }
 }
 
-export const redis = new Redis(process.env.REDIS_ENDPOINT, { password: "" });
+// export const redis = new Redis(process.env.REDIS_ENDPOINT, { password: "" });
 
 async function main() {
   const provider = new WsProvider(RELAY_ENDPINT);
@@ -78,13 +78,13 @@ async function main() {
     const funds = await api.query.crowdloan.funds.entries();
     const { block } = await api.rpc.chain.getBlock();
     // Check if in vrf
-    const auctionInfo = (await api.query.auctions.auctionInfo()) as Option<
-      ITuple<[u32, u32]>
-    >;
-    const isInVrf =
-      auctionInfo.isSome &&
-      auctionInfo.unwrap()[1].toNumber() < block.header.number.toNumber();
-
+    // const auctionInfo = (await api.query.auctions.auctionInfo()) as Option<
+    //   ITuple<[u32, u32]>
+    // >;
+    // const isInVrf =
+    //   auctionInfo.isSome &&
+    //   auctionInfo.unwrap()[1].toNumber() < block.header.number.toNumber();
+    //
     // if (isInVrf) {
     //   await sleep(6000);
     //   continue;
