@@ -1,13 +1,8 @@
-import {
-  ContributionTask,
-  fetchContributions,
-  nextProcessBlock,
-} from "./query";
+import { nextProcessBlock } from "./query";
 import { logger } from "./logger";
 import { ApiPromise, WsProvider, Keyring } from "@polkadot/api";
 import type { SubmittableExtrinsic } from "@polkadot/api/submittable/types";
 import { WHITELIST } from "./executor";
-import Redis from "ioredis";
 import dotenv from "dotenv";
 import { Option, u32 } from "@polkadot/types";
 import { ITuple } from "@polkadot/types/types";
@@ -31,8 +26,6 @@ async function waitSubqueryIndexBlock(height: number) {
     await sleep(6000);
   }
 }
-
-export const redis = new Redis(process.env.REDIS_ENDPOINT, { password: "" });
 
 async function main() {
   const provider = new WsProvider(RELAY_ENDPINT);
@@ -86,8 +79,8 @@ async function main() {
       auctionInfo.unwrap()[1].toNumber() < block.header.number.toNumber();
 
     if (isInVrf) {
-      await sleep(6000);
-      continue;
+      // await sleep(6000);
+      // continue;
     }
 
     const keys = funds
