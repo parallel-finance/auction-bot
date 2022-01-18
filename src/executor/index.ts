@@ -1,13 +1,13 @@
-import {ApiPromise} from "@polkadot/api";
-import {logger} from "../logger";
-import {fetchContributions} from "../query";
-import {mantaExecutor, PARA_ID as MANTA} from "./manta";
-import {nodleExecutor, PARA_ID as NODLE} from "./nodle";
-import {darwiniaExecutor, PARA_ID as DARWINIA} from "./darwinia";
-import {interlayExecutor, PARA_ID as INTERLAY} from "./interlay";
-import {centrifugeExecutor, PARA_ID as CENTRIFUGE} from "./centrifuge";
-import {efinityFetcher, PARA_ID as EFINITY} from "./efinity";
-import {equilibriumExecutor, PARA_ID as EQUILIBRIUM} from "./equilibrium";
+import { ApiPromise } from "@polkadot/api";
+import { logger } from "../logger";
+import { fetchContributions } from "../query";
+import { mantaExecutor, PARA_ID as MANTA } from "./manta";
+import { nodleExecutor, PARA_ID as NODLE } from "./nodle";
+import { darwiniaExecutor, PARA_ID as DARWINIA } from "./darwinia";
+import { interlayExecutor, PARA_ID as INTERLAY } from "./interlay";
+import { centrifugeExecutor, PARA_ID as CENTRIFUGE } from "./centrifuge";
+import { efinityFetcher, PARA_ID as EFINITY } from "./efinity";
+import { equilibriumExecutor, PARA_ID as EQUILIBRIUM } from "./equilibrium";
 
 export type Executor = typeof mantaExecutor;
 export type Fetcher = typeof fetchContributions;
@@ -33,22 +33,20 @@ const defaultExecutor = async (
 
 const defaultExecutorFactory =
   (paraId: number, fetcher: Fetcher = fetchContributions) =>
-    (api: ApiPromise) =>
-      defaultExecutor(api, paraId, fetcher);
+  (api: ApiPromise) =>
+    defaultExecutor(api, paraId, fetcher);
 
-const COMPOSABLE = 2019;
 const COINVERSATION = 2027;
 const LITENTRY = 2013;
 const PHALA = 2035;
 const SUBGAME = 2017;
 const HYDRADX = 2034;
 
-export const WHITELIST: {[paraId: number]: Executor} = {
+export const WHITELIST: { [paraId: number]: Executor } = {
   2002: defaultExecutorFactory(2002),
   2008: defaultExecutorFactory(2008),
   [DARWINIA]: darwiniaExecutor,
   [NODLE]: nodleExecutor,
-  [COMPOSABLE]: defaultExecutorFactory(COMPOSABLE),
   [INTERLAY]: interlayExecutor,
   [CENTRIFUGE]: centrifugeExecutor,
   [EQUILIBRIUM]: equilibriumExecutor,

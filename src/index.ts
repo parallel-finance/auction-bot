@@ -78,17 +78,18 @@ async function main() {
     const funds = await api.query.crowdloan.funds.entries();
     const { block } = await api.rpc.chain.getBlock();
     // Check if in vrf
-    // const auctionInfo = (await api.query.auctions.auctionInfo()) as Option<
-    //   ITuple<[u32, u32]>
-    // >;
-    // const isInVrf =
-    //   auctionInfo.isSome &&
-    //   auctionInfo.unwrap()[1].toNumber() < block.header.number.toNumber();
-    //
-    // if (isInVrf) {
-    //   await sleep(6000);
-    //   continue;
-    // }
+    const auctionInfo = (await api.query.auctions.auctionInfo()) as Option<
+      ITuple<[u32, u32]>
+    >;
+    const isInVrf =
+      auctionInfo.isSome &&
+      auctionInfo.unwrap()[1].toNumber() + 72000 <
+        block.header.number.toNumber();
+
+    if (isInVrf) {
+      await sleep(6000);
+      continue;
+    }
 
     const keys = funds
       .map(([key, val]) => {
