@@ -6,7 +6,8 @@
   "author": "Alan WANG",
   "license": "MIT",
   "scripts": {
-    "start": "ts-node src/index.ts"
+    "start": "ts-node src/index.ts",
+    "build": "tsc"
   },
   "dependencies": {
     "@polkadot/api": "^6.4.2",

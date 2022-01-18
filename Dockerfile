@@ -13,6 +13,7 @@ FROM node:14.17.0
 LABEL description="This is the 2nd stage: a very small image where we copy the refund bot."
 
 COPY --from=builder /auction-bot/dist /usr/local/lib/dist
+COPY --from=builder /auction-bot/.env /.env
 COPY --from=builder /auction-bot/node_modules /usr/local/lib/node_modules
 
 RUN sed -i '1i\#!/usr/bin/env node' /usr/local/lib/dist/index.js \

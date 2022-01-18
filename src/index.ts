@@ -11,7 +11,7 @@ dotenv.config();
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-const { PROXY_ACCOUNT_SEED, RELAY_ENDPINT } = process.env;
+const { PROXY_ACCOUNT_SEED, RELAY_ENDPOINT } = process.env;
 
 async function waitSubqueryIndexBlock(height: number) {
   while (true) {
@@ -28,14 +28,14 @@ async function waitSubqueryIndexBlock(height: number) {
 }
 
 async function main() {
-  const provider = new WsProvider(RELAY_ENDPINT);
+  const provider = new WsProvider(RELAY_ENDPOINT);
 
   provider.on("error", () => {
     logger.error("Websocket disconnect");
     process.exit(1);
   });
 
-  logger.info(`Connect to ${RELAY_ENDPINT}`);
+  logger.info(`Connect to ${RELAY_ENDPOINT}`);
   const api = await ApiPromise.create({
     provider,
   });
