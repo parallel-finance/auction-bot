@@ -34,6 +34,10 @@ async function main() {
     logger.error("Websocket disconnect");
     process.exit(1);
   });
+  provider.on("disconnected", () => {
+    logger.error("Websocket disconnect");
+    process.exit(1);
+  });
 
   logger.info(`Connect to ${RELAY_ENDPOINT}`);
   const api = await ApiPromise.create({
