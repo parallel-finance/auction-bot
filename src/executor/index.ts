@@ -49,7 +49,6 @@ export const WHITELIST: { [paraId: number]: Executor } = {
   [DARWINIA]: darwiniaExecutor,
   [NODLE]: nodleExecutor,
   [INTERLAY]: interlayExecutor,
-  [CENTRIFUGE]: centrifugeExecutor,
   [EQUILIBRIUM]: equilibriumExecutor,
   [COINVERSATION]: defaultExecutorFactory(COINVERSATION),
   [LITENTRY]: defaultExecutorFactory(LITENTRY),

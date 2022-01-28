@@ -28,21 +28,20 @@ async function waitSubqueryIndexBlock(height: number) {
 }
 
 async function main() {
-  const provider = new WsProvider(RELAY_ENDPOINT);
-
-  provider.on("error", () => {
-    logger.error("Websocket disconnect");
-    process.exit(1);
+  const api = new ApiPromise({
+    provider: new WsProvider(RELAY_ENDPOINT),
   });
-  provider.on("disconnected", () => {
-    logger.error("Websocket disconnect");
-    process.exit(1);
-  });
-
-  logger.info(`Connect to ${RELAY_ENDPOINT}`);
-  const api = await ApiPromise.create({
-    provider,
-  });
+  await api.isReady;
+  const apiConnect = () =>
+    new Promise<void>(async (resolve) => {
+      api.once("connected", () => resolve());
+      api.connect();
+    });
+  const apiDisconnect = () =>
+    new Promise<void>(async (resolve) => {
+      api.once("disconnected", () => resolve());
+      api.disconnect();
+    });
   let keyring = new Keyring({ ss58Format: 2, type: "sr25519" });
   const signer = keyring.addFromUri(PROXY_ACCOUNT_SEED as string);
 
@@ -72,6 +71,7 @@ async function main() {
   await waitSubqueryIndexBlock(block.header.number.toNumber());
 
   while (true) {
+    await apiConnect();
     const funds = await api.query.crowdloan.funds.entries();
     const { block } = await api.rpc.chain.getBlock();
     // Check if in vrf
@@ -84,8 +84,9 @@ async function main() {
         block.header.number.toNumber();
 
     if (isInVrf) {
-      // await sleep(6000);
-      // continue;
+      await apiDisconnect();
+      await sleep(6000);
+      continue;
     }
 
     const keys = funds
@@ -105,6 +106,7 @@ async function main() {
     ).flat();
 
     if (availableTasks.length === 0) {
+      await apiDisconnect();
       await sleep(6000);
       continue;
     }
@@ -116,6 +118,7 @@ async function main() {
     const callResults = (await Promise.all(calls)) as number[];
     const finalizedBlock = Math.max(...callResults);
 
+    await api.disconnect();
     await waitSubqueryIndexBlock(finalizedBlock);
   }
 }
