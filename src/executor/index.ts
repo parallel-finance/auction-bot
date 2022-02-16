@@ -44,6 +44,7 @@ const SUBGAME = 2017;
 export const WHITELIST: { [paraId: number]: Executor } = {
   2002: defaultExecutorFactory(2002),
   2008: defaultExecutorFactory(2008),
+  2028: defaultExecutorFactory(2028),
   2036: defaultExecutorFactory(2036),
   [DARWINIA]: darwiniaExecutor,
   [NODLE]: nodleExecutor,
