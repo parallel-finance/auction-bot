@@ -2,7 +2,6 @@ import { ApiPromise } from "@polkadot/api";
 import { logger } from "../logger";
 import { fetchContributions } from "../query";
 import { mantaExecutor, PARA_ID as MANTA } from "./manta";
-import { equilibriumExecutor, PARA_ID as EQUILIBRIUM } from "./equilibrium";
 
 export type Executor = typeof mantaExecutor;
 export type Fetcher = typeof fetchContributions;
@@ -32,11 +31,11 @@ const defaultExecutorFactory =
     defaultExecutor(api, paraId, fetcher);
 
 const COINVERSATION = 2027;
-const PHALA = 2035;
 
 export const WHITELIST: { [paraId: number]: Executor } = {
   2037: defaultExecutorFactory(2037),
-  [EQUILIBRIUM]: equilibriumExecutor,
+  2038: defaultExecutorFactory(2038),
+  2040: defaultExecutorFactory(2040),
+  2013: defaultExecutorFactory(2013),
   [COINVERSATION]: defaultExecutorFactory(COINVERSATION),
-  [PHALA]: defaultExecutorFactory(PHALA),
 };
