@@ -33,7 +33,6 @@ const defaultExecutorFactory =
 export const WHITELIST: { [paraId: number]: Executor } = {
   2030: defaultExecutorFactory(2030),
   2038: defaultExecutorFactory(2038),
-  2040: defaultExecutorFactory(2040),
+  2007: defaultExecutorFactory(2007),
   2027: defaultExecutorFactory(2027),
-  2043: defaultExecutorFactory(2043),
 };
